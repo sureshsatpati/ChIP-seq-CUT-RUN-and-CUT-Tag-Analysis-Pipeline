@@ -27,12 +27,11 @@ Motif Enrichment Analysis: Identification of transcription factor binding motifs
 
 FastQC / MultiQC (quality control)
 
+<img width="817" height="254" alt="image" src="https://github.com/user-attachments/assets/6117bfec-b750-41bb-aa3f-d073e1256b3c" />
+
 Bowtie2 / BWA (read alignment)
 
 SAMtools / Picard (file processing)
-
-<img width="817" height="254" alt="image" src="https://github.com/user-attachments/assets/6117bfec-b750-41bb-aa3f-d073e1256b3c" />
-
 
 MACS2 (peak calling)
 
