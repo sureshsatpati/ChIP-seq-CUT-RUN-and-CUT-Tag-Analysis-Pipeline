@@ -1,0 +1,62 @@
+#BSUB -W 240:00
+#BSUB -omacs2.out
+#BSUB -emacs2.err
+#BSUB -cwd .
+#BSUB -q vlong 
+#BSUB -n 4 
+#BSUB -M 100
+#BSUB -R rusage[mem=100]
+##BSUB -B
+##BSUB -N
+##BSUB -u ssatpati@mdanderson.org
+#BSUB -J macs
+## explanation of arguments above:
+## -W run-time (wall clock) in hour:min  (required)
+## -o use this or output (stdout) will be sent via email!
+## -e use this or errors (stderr) will be sent via email!
+## -cwd set the current working directory.
+## -q queue name (required) 
+## -n number of processors required (28=entire node)
+## -M memory limit in GB (required). 
+## -R memory reserved in GB (defauminimum is 1GB).
+## -B send email to the user when the job begins (optional).
+## -N send email to the user when the job ends (optional).
+## -u send email to the specified address (required if -B and -N are used).
+##    It is recommended to always include your MD Anderson email address.
+## -J arbitrary job name, letters, dashes, underscores only - no spaces!
+##
+## Memory is specified as GB
+##
+## This script requests a wallclock of 1 hour, 12 CPUs, and 17G of memory, in the short queue
+
+## To submit:  bsub < example.lsf
+
+## All commands below should be valid linux commands
+
+#module load samtools
+module load macs2
+eval "$(/risapps/rhel8/miniforge3/24.5.0-0/bin/conda shell.bash hook)"
+conda activate macs2-2.2.7.1
+
+#for i insample_1522118_WD_H3K27Ac_R1.target.markdup.sorted.bam; do macs2 callpeak -t "$i" -c sample_1522118_WD_IgG_R1.target.markdup.sorted.bam  -n $(basename "$i" R1.target.markdup.sorted.bam).out -p 0.00001 --nomodel --extsize 200 --keep-dup all -g mm; done
+
+
+for i in 25456FL-01-01-08_S20_filtered_blacklisted_sorted.bam; do macs2 callpeak -t "$i" -c 25456FL-01-01-07_S19_filtered_blacklisted_sorted.bam -n $(basename "$i" _filtered_blacklisted_sorted.bam).out_vs_S19 -p 0.0001 --nomodel --extsize 200 --keep-dup all -g mm; done
+
+for i in 25456FL-01-01-10_S22_filtered_blacklisted_sorted.bam ; do macs2 callpeak -t "$i" -c 25456FL-01-01-09_S21_filtered_blacklisted_sorted.bam -n $(basename "$i" _filtered_blacklisted_sorted.bam).out_vs_S21 -p 0.0001 --nomodel --extsize 200 --keep-dup all -g mm; done
+
+for i in 25456FL-01-01-12_S24_filtered_blacklisted_sorted.bam ; do macs2 callpeak -t "$i" -c 25456FL-01-01-11_S23_filtered_blacklisted_sorted.bam -n $(basename "$i" _filtered_blacklisted_sorted.bam).out_vs_S23 -p 0.0001 --nomodel --extsize 200 --keep-dup all -g mm; done
+
+for i in 25456FL-01-01-02_S14_filtered_blacklisted_sorted.bam ; do macs2 callpeak -t "$i" -c 25456FL-01-01-01_S13_filtered_blacklisted_sorted.bam  -n $(basename "$i" _filtered_blacklisted_sorted.bam).out_vs_S13 -p 0.0001 --nomodel --extsize 200 --keep-dup all -g mm; done
+
+for i in 25456FL-01-01-04_S16_filtered_blacklisted_sorted.bam ; do macs2 callpeak -t "$i" -c 25456FL-01-01-03_S15_filtered_blacklisted_sorted.bam  -n $(basename "$i" _filtered_blacklisted_sorted.bam).out_vs_S15 -p 0.0001 --nomodel --extsize 200 --keep-dup all -g mm; done
+
+for i in 25456FL-01-01-06_S18_filtered_blacklisted_sorted.bam ; do macs2 callpeak -t "$i" -c 25456FL-01-01-05_S17_filtered_blacklisted_sorted.bam  -n $(basename "$i" _filtered_blacklisted_sorted.bam).out_vs_S17 -p 0.0001 --nomodel --extsize 200 --keep-dup all -g mm; done
+
+for i in 25456FL-01-01-10_S22_filtered_blacklisted_sorted.bam ; do macs2 callpeak -t "$i" -c 25456FL-01-01-08_S20_filtered_blacklisted_sorted.bam  -n $(basename "$i" _filtered_blacklisted_sorted.bam).out_vs_S20 -p 0.0001 --nomodel --extsize 200 --keep-dup all -g mm; done
+
+for i in 25456FL-01-01-12_S24_filtered_blacklisted_sorted.bam ; do macs2 callpeak -t "$i" -c 25456FL-01-01-08_S20_filtered_blacklisted_sorted.bam  -n $(basename "$i" _filtered_blacklisted_sorted.bam).out_vs_S20 -p 0.0001 --nomodel --extsize 200 --keep-dup all -g mm; done
+
+for i in 25456FL-01-01-12_S24_filtered_blacklisted_sorted.bam ; do macs2 callpeak -t "$i" -c 25456FL-01-01-10_S22_filtered_blacklisted_sorted.bam  -n $(basename "$i" _filtered_blacklisted_sorted.bam).out_vs_S22 -p 0.0001 --nomodel --extsize 200 --keep-dup all -g mm; done
+
+

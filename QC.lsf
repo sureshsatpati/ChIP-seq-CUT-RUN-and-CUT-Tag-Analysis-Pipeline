@@ -1,0 +1,88 @@
+##BSUB gpu num=1:gmem=16
+#BSUB -W 240:00
+#BSUB -o ./QC-alig.out
+#BSUB -e ./QC-alig.err
+#BSUB -cwd .
+#BSUB -q vlong
+#BSUB -n 25 
+#BSUB -M 150
+#BSUB -R rusage[mem=150]
+##BSUB -B
+##BSUB -N
+##BSUB -u 
+#BSUB -J qc-align 
+## explanation of arguments above:
+## -W run-time (wall clock) in hour:min  (required)
+## -o use this or output (stdout) will be sent via email!
+## -e use this or errors (stderr) will be sent via email!
+## -cwd set the current working directory.
+## -q queue name (required) 
+## -n number of processors required (28=entire node)
+## -M memory limit in GB (required). 
+## -R memory reserved in GB (default/minimum is 1GB).
+## -B send email to the user when the job begins (optional).
+## -N send email to the user when the job ends (optional).
+## -u send email to the specified address (required if -B and -N are used).
+##    It is recommended to always include your MD Anderson email address.
+## -J arbitrary job name, letters, dashes, underscores only - no spaces!
+##
+## Memory is specified as GB
+##
+## This script requests a wallclock of 1 hour, 12 CPUs, and 17G of memory, in the short queue
+
+## To submit:  bsub < example.lsf
+
+## All commands below should be valid linux commands
+
+#module load fastp
+#eval "$(/risapps/rhel8/miniforge3/24.5.0-0/bin/conda shell.bash hook)"
+#conda activate fastp-0.23.2
+
+#bash -c 'for i in /rsrch3/home/genomic_med/ssatpati/Gubin/1.Raw/25456_01_10242025_180106_fastq/*R1_001.fastq.gz; do fastp -h $(basename "$i" _R1_001.fastq.gz).fastp.html -j $(basename "$i" _R1_001.fastq.gz).fastp.json -w 10 -l 30 --cut_mean_quality 20  -a auto -f 10 -F 10 -p -z 9 -i "$i" -I /rsrch3/home/genomic_med/ssatpati/Gubin/1.Raw/25456_01_10242025_180106_fastq/$(basename "$i" _R1_001.fastq.gz)_R2_001.fastq.gz -o $(basename "$i" .fastq.gz).clean.fastq.gz -O $(basename "$i" _R1_001.fastq.gz)_R2_001.clean.fastq.gz; done'
+
+
+module load bowtie2
+
+bash -c 'for i in ./*_R1_001.clean.fastq.gz; do bowtie2 --end-to-end --very-sensitive --no-mixed --no-discordant --phred33 -I 10 -X 700 -x /rsrch4/scratch/genomic_med/METI/Suresh/Deepa/genome/mouse/Mus_musculus_mm10 -1 "$i" -2 $(basename "$i" _R1_001.clean.fastq.gz)_R2_001.clean.fastq.gz -S $(basename "$i" _R1_001.clean.fastq.gz).sam; done'
+
+module load picard
+eval "$(/risapps/rhel8/miniforge3/24.5.0-0/bin/conda shell.bash hook)"
+conda activate --stack picard-2.27.4
+
+bash -c 'for i in *.sam; do picard SortSam -I "$i" -O $(basename "$i" .sam)_sorted.bam -SO coordinate; done'
+
+bash -c 'for i in *_sorted.bam; do picard MarkDuplicates -I "$i" -O $(basename "$i" _sorted.bam)_sorted_dedup.bam -M $(basename "$i" _sorted.bam)_dupmark_metrics.txt; done'
+
+module load samtools
+eval "$(/risapps/rhel8/miniforge3/24.5.0-0/bin/conda shell.bash hook)"
+conda activate --stack samtools-1.16.1
+
+
+bash -c 'for i in *sorted_dedup.bam; do samtools view -b -F 0x4 "$i" -o $(basename "$i" _sorted_dedup.bam)_mapped.bam; done'
+
+module load bedtools --stack
+eval "$(/risapps/rhel8/miniforge3/24.5.0-0/bin/conda shell.bash hook)"
+conda activate --stack bedtools-2.30.0
+
+bedtools intersect -a 25456FL-01-01-01_S13_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-01_S13_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-02_S14_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-02_S14_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-03_S15_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-03_S15_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-04_S16_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-04_S16_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-05_S17_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-05_S17_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-06_S18_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-06_S18_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-07_S19_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-07_S19_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-08_S20_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-08_S20_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-09_S21_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-09_S21_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-10_S22_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-10_S22_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-11_S23_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-11_S23_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-12_S24_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-12_S24_filtered_blacklisted_sorted.bam
+bedtools intersect -a 25456FL-01-01-13_S25_L006_mapped.bam -b hg38-blacklist.v2.bed -v | samtools sort -O BAM -o 25456FL-01-01-13_S25_filtered_blacklisted_sorted.bam
+
+for bam in *_filtered_blacklisted_sorted.bam; do
+  samtools index "$bam"
+done
+
+for bam in *.bam; do
+  echo -n "$bam: "
+  samtools view -c "$bam"
+done
